@@ -16,4 +16,17 @@ function getDatasetOfWinnersOrLosers(data, toggle) {
     .map((item) => item[0]);
 }
 
-module.exports = { randomIntegerFromInterval, getDatasetOfWinnersOrLosers };
+function createArray(object) {
+  let array = [];
+  for (const key in object) {
+    object[key].id = key;
+    array.push(object[key]);
+  }
+  return array;
+}
+
+module.exports = {
+  randomIntegerFromInterval,
+  getDatasetOfWinnersOrLosers,
+  createArray,
+};

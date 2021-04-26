@@ -1,11 +1,14 @@
 const firebase = require("./index");
-const { randomIntegerFromInterval } = require("../utils");
+const { randomIntegerFromInterval, createArray } = require("../utils");
 
-const hamstersRef = firebase.database().ref("hamsters/");
+let hamstersRef = firebase.database().ref("hamsters/");
 
 function addHamsters(data) {
   try {
-    hamstersRef.push(data);
+    return hamstersRef.push(data).then((item) => {
+      const obj = { ...data, id: item.key };
+      return obj;
+    });
   } catch (error) {
     return error;
   }
@@ -16,7 +19,7 @@ function getHamsters() {
     hamstersRef.on(
       "value",
       (snapshot) => {
-        resolve(snapshot.val());
+        resolve(createArray(snapshot.val()));
       },
       (error) => {
         reject(error);
@@ -40,13 +43,16 @@ function getHamster(id) {
   });
 }
 
-function deleteHamster(id) {
+async function deleteHamster(id) {
   try {
+    const data = await getHamster(id);
+    if (!data) return;
     hamstersRef.child(id).on("value", function (data) {
       data.ref.remove();
     });
+    return true;
   } catch (error) {
-    return error;
+    console.log(error);
   }
 }
 
@@ -57,22 +63,26 @@ async function randomHamster() {
     const index = randomIntegerFromInterval(0, keys.length - 1);
     return data[keys[index]];
   } catch (error) {
-    return error;
+    console.log(error);
   }
 }
-async function updateHamster(id) {
+async function updateHamster(id, data) {
   try {
-    console.log("put 111", id); //wins: 10, games
-    let array = [];
-    array[0] = await hamstersRef.child(id).child("games");
-    array[1] = await hamstersRef.child(id).child("wins");
-    array.forEach((item) => {
-      item.transaction(function (current) {
-        return Number(current) + 1;
+    const items = await getHamsters();
+    const array = items.filter((item) => item.id === id);
+    if (array.length === 0) return;
+
+    const dataRef = hamstersRef.child(id);
+    return dataRef
+      .update(data)
+      .then((date) => {
+        return { ...array[0], ...data };
+      })
+      .catch((error) => {
+        console.log(error);
       });
-    });
   } catch (error) {
-    return error;
+    console.log(error);
   }
 }
 

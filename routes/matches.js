@@ -9,7 +9,7 @@ const {
   getWinners,
   getLosers,
   matchWinners,
-} = require("../servise/matches.js");
+} = require("../service/matches.js");
 
 router
   .route("/matches")

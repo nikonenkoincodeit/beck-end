@@ -8,8 +8,9 @@ const {
   deleteHamster,
   randomHamster,
   updateHamster,
-} = require("../servise/hamsters.js");
+} = require("../service/hamsters.js");
 
+const { validationData } = require("../middleware/validation");
 router
   .route("/hamsters")
   .get(async (req, res) => {
@@ -22,8 +23,8 @@ router
   })
   .post(async (req, res) => {
     try {
-      await addHamsters(req.body);
-      res.sendStatus(200);
+      const data = await addHamsters(req.body);
+      res.send(JSON.stringify(data));
     } catch (error) {
       res.sendStatus(404);
     }
@@ -43,7 +44,8 @@ router
   .get(async (req, res) => {
     try {
       const data = await getHamster(req.params.id);
-      res.send(JSON.stringify(data)).status(200);
+      if (!data) res.sendStatus(404);
+      else res.send(JSON.stringify(data));
     } catch (error) {
       res.sendStatus(404);
     }
@@ -51,17 +53,19 @@ router
   .delete(async (req, res) => {
     try {
       const data = await deleteHamster(req.params.id);
-      res.sendStatus(200);
+      if (!data) res.sendStatus(404);
+      else res.sendStatus(200);
     } catch (error) {
       res.sendStatus(404);
     }
   })
-  .put(async (req, res) => {
+  .put(validationData, async (req, res) => {
     try {
-      await updateHamster(req.params.id);
-      res.sendStatus(200);
+      const data = await updateHamster(req.params.id, req.body);
+      if (!data) res.sendStatus(404);
+      else res.send(JSON.stringify(data));
     } catch (error) {
-      res.sendStatus(404);
+      console.log(error);
     }
   });
 
