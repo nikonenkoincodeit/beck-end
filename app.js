@@ -4,7 +4,7 @@ const cors = require("cors");
 const { hamsters, matches } = require("./routes");
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(cors()).use(express.json()).use("/api", hamsters).use("/api", matches);
 
