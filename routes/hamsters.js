@@ -18,7 +18,7 @@ router
       const data = await getHamsters();
       res.send(JSON.stringify(data));
     } catch (error) {
-      res.sendStatus(404);
+      res.sendStatus(500);
     }
   })
   .post(async (req, res) => {
@@ -26,7 +26,7 @@ router
       const data = await addHamsters(req.body);
       res.send(JSON.stringify(data));
     } catch (error) {
-      res.sendStatus(404);
+      res.sendStatus(500);
     }
   });
 
@@ -35,7 +35,7 @@ router.route("/hamsters/random/").get(async (req, res) => {
     const data = await randomHamster();
     res.send(JSON.stringify(data));
   } catch (error) {
-    res.sendStatus(404);
+    res.sendStatus(500);
   }
 });
 
@@ -47,7 +47,7 @@ router
       if (!data) res.sendStatus(404);
       else res.send(JSON.stringify(data));
     } catch (error) {
-      res.sendStatus(404);
+      res.sendStatus(500);
     }
   })
   .delete(async (req, res) => {
@@ -56,7 +56,7 @@ router
       if (!data) res.sendStatus(404);
       else res.sendStatus(200);
     } catch (error) {
-      res.sendStatus(404);
+      res.sendStatus(500);
     }
   })
   .put(validationData, async (req, res) => {
@@ -65,7 +65,7 @@ router
       if (!data) res.sendStatus(404);
       else res.send(JSON.stringify(data));
     } catch (error) {
-      console.log(error);
+      res.sendStatus(500);
     }
   });
 

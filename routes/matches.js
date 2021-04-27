@@ -18,7 +18,7 @@ router
       const data = await getMatches();
       res.send(JSON.stringify(data));
     } catch (error) {
-      res.sendStatus(404);
+      res.sendStatus(500);
     }
   })
   .post(async (req, res) => {
@@ -26,7 +26,7 @@ router
       await addMatches(req.body);
       res.sendStatus(200);
     } catch (error) {
-      res.sendStatus(404);
+      res.sendStatus(500);
     }
   });
 
@@ -35,9 +35,9 @@ router
   .get(async (req, res) => {
     try {
       const data = await getMatche(req.params.id);
-      res.send(JSON.stringify(data)).status(200);
+      res.send(JSON.stringify(data));
     } catch (error) {
-      res.sendStatus(404);
+      res.sendStatus(500);
     }
   })
   .delete(async (req, res) => {
@@ -45,7 +45,7 @@ router
       const data = await deleteMatches(req.params.id);
       res.sendStatus(200);
     } catch (error) {
-      res.sendStatus(404);
+      res.sendStatus(500);
     }
   });
 
@@ -58,7 +58,7 @@ router.route("/winners").get(async (req, res) => {
     };
     res.send(JSON.stringify(obj)).status(200);
   } catch (error) {
-    res.sendStatus(404);
+    res.sendStatus(500);
   }
 });
 
@@ -69,9 +69,9 @@ router.route("/losers").get(async (req, res) => {
     const obj = {
       losers: result,
     };
-    res.send(JSON.stringify(obj)).status(200);
+    res.send(JSON.stringify(obj));
   } catch (error) {
-    res.sendStatus(404);
+    res.sendStatus(500);
   }
 });
 
@@ -80,7 +80,7 @@ router.route("/matchWinners/:id").get(async (req, res) => {
     const data = await matchWinners(req.params.id);
     res.send(JSON.stringify(data));
   } catch (error) {
-    res.sendStatus(404);
+    res.sendStatus(500);
   }
 });
 
