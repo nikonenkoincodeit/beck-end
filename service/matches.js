@@ -1,11 +1,14 @@
-const { getDatasetOfWinnersOrLosers } = require("../utils");
+const { getDatasetOfWinnersOrLosers, createArray } = require("../utils");
 const firebase = require("./index");
 
 const matchesRef = firebase.database().ref("matches/");
 
 function addMatches(data) {
   try {
-    matchesRef.push(data);
+    return matchesRef.push(data).then((item) => {
+      const obj = { ...data, id: item.key };
+      return obj;
+    });
   } catch (error) {
     return error;
   }
@@ -16,7 +19,7 @@ function getMatches() {
     matchesRef.on(
       "value",
       (snapshot) => {
-        resolve(snapshot.val());
+        resolve(createArray(snapshot.val()));
       },
       (error) => {
         reject(error);
@@ -31,7 +34,9 @@ function getMatche(id) {
     matcherRef.on(
       "value",
       (snapshot) => {
-        resolve(snapshot.val());
+        const data = snapshot.val();
+        const obj = { id, ...data };
+        resolve(obj);
       },
       (error) => {
         reject(error);
@@ -40,28 +45,31 @@ function getMatche(id) {
   });
 }
 
-function deleteMatches(id) {
+async function deleteMatches(id) {
   try {
+    const data = await getMatche(id);
+    if (!data.winnerId) return;
     matchesRef.child(id).on("value", function (data) {
       data.ref.remove();
     });
+    return data;
   } catch (error) {
     return error;
   }
 }
 
-async function getWinners(data) {
+async function getWinners(data, hamsters) {
   try {
-    const id = await getDatasetOfWinnersOrLosers(data, "winnerId");
+    const id = await getDatasetOfWinnersOrLosers(data, "winnerId", hamsters);
     return id;
   } catch (error) {
     return error;
   }
 }
 
-async function getLosers(data) {
+async function getLosers(data, hamsters) {
   try {
-    const id = await getDatasetOfWinnersOrLosers(data, "loserId");
+    const id = await getDatasetOfWinnersOrLosers(data, "loserId", hamsters);
     return id;
   } catch (error) {
     return error;
@@ -70,10 +78,12 @@ async function getLosers(data) {
 
 async function matchWinners(id) {
   const data = await getMatches();
+  let array = [];
   for (item in data) {
-    if (data[item].winnerId !== id) delete data[item];
+    if (data[item].winnerId === id) array.push(data[item]);
   }
-  return data;
+
+  return !!array.length ? array : [];
 }
 
 module.exports = {

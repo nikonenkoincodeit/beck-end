@@ -10,18 +10,20 @@ const {
   updateHamster,
 } = require("../service/hamsters.js");
 
-const { validationData } = require("../middleware/validation");
+const { validationData } = require("../helpers/validation");
+const { showQueryResult } = require("../helpers/result");
+
 router
   .route("/hamsters")
   .get(async (req, res) => {
     try {
       const data = await getHamsters();
-      res.send(JSON.stringify(data));
+      showQueryResult(!data, data, res);
     } catch (error) {
       res.sendStatus(500);
     }
   })
-  .post(async (req, res) => {
+  .post(checkRequestParameters, async (req, res) => {
     try {
       const data = await addHamsters(req.body);
       res.send(JSON.stringify(data));
@@ -30,10 +32,19 @@ router
     }
   });
 
+function checkRequestParameters(req, res, next) {
+  const b = req.body;
+  if (b.name && b.age && b.imgName) {
+    next();
+  } else {
+    res.sendStatus(404);
+  }
+}
+
 router.route("/hamsters/random/").get(async (req, res) => {
   try {
     const data = await randomHamster();
-    res.send(JSON.stringify(data));
+    showQueryResult(!data.name, data, res);
   } catch (error) {
     res.sendStatus(500);
   }
@@ -44,8 +55,7 @@ router
   .get(async (req, res) => {
     try {
       const data = await getHamster(req.params.id);
-      if (!data) res.sendStatus(404);
-      else res.send(JSON.stringify(data));
+      showQueryResult(!data.name, data, res);
     } catch (error) {
       res.sendStatus(500);
     }
@@ -53,8 +63,7 @@ router
   .delete(async (req, res) => {
     try {
       const data = await deleteHamster(req.params.id);
-      if (!data) res.sendStatus(404);
-      else res.sendStatus(200);
+      showQueryResult(!data, data, res);
     } catch (error) {
       res.sendStatus(500);
     }
@@ -62,8 +71,7 @@ router
   .put(validationData, async (req, res) => {
     try {
       const data = await updateHamster(req.params.id, req.body);
-      if (!data) res.sendStatus(404);
-      else res.send(JSON.stringify(data));
+      showQueryResult(!data, data, res);
     } catch (error) {
       res.sendStatus(500);
     }

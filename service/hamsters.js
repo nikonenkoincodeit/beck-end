@@ -34,7 +34,9 @@ function getHamster(id) {
     hamsterRef.on(
       "value",
       (snapshot) => {
-        resolve(snapshot.val());
+        const data = snapshot.val();
+        const obj = { id, ...data };
+        resolve(obj);
       },
       (error) => {
         reject(error);
@@ -46,11 +48,11 @@ function getHamster(id) {
 async function deleteHamster(id) {
   try {
     const data = await getHamster(id);
-    if (!data) return;
+    if (!data.name) return;
     hamstersRef.child(id).on("value", function (data) {
       data.ref.remove();
     });
-    return true;
+    return data;
   } catch (error) {
     console.log(error);
   }

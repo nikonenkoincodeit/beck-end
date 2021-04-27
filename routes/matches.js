@@ -11,31 +11,42 @@ const {
   matchWinners,
 } = require("../service/matches.js");
 
+const { showQueryResult, showArrayOfResults } = require("../helpers/result");
+
 router
   .route("/matches")
   .get(async (req, res) => {
     try {
       const data = await getMatches();
-      res.send(JSON.stringify(data));
+      showQueryResult(!data, data, res);
     } catch (error) {
       res.sendStatus(500);
     }
   })
-  .post(async (req, res) => {
+  .post(checkRequestParameters, async (req, res) => {
     try {
-      await addMatches(req.body);
-      res.sendStatus(200);
+      const data = await addMatches(req.body);
+      res.send(JSON.stringify(data));
     } catch (error) {
       res.sendStatus(500);
     }
   });
+
+function checkRequestParameters(req, res, next) {
+  const b = req.body;
+  if (b.winnerId && b.loserId) {
+    next();
+  } else {
+    res.sendStatus(404);
+  }
+}
 
 router
   .route("/matches/:id")
   .get(async (req, res) => {
     try {
       const data = await getMatche(req.params.id);
-      res.send(JSON.stringify(data));
+      showQueryResult(!data.winnerId, data, res);
     } catch (error) {
       res.sendStatus(500);
     }
@@ -43,7 +54,7 @@ router
   .delete(async (req, res) => {
     try {
       const data = await deleteMatches(req.params.id);
-      res.sendStatus(200);
+      showQueryResult(!data, data, res);
     } catch (error) {
       res.sendStatus(500);
     }
@@ -51,12 +62,7 @@ router
 
 router.route("/winners").get(async (req, res) => {
   try {
-    const data = await getMatches();
-    const result = await getWinners(data);
-    const obj = {
-      winners: result,
-    };
-    res.send(JSON.stringify(obj)).status(200);
+    showArrayOfResults(getWinners, res);
   } catch (error) {
     res.sendStatus(500);
   }
@@ -64,12 +70,7 @@ router.route("/winners").get(async (req, res) => {
 
 router.route("/losers").get(async (req, res) => {
   try {
-    const data = await getMatches();
-    const result = await getLosers(data);
-    const obj = {
-      losers: result,
-    };
-    res.send(JSON.stringify(obj));
+    showArrayOfResults(getLosers, res);
   } catch (error) {
     res.sendStatus(500);
   }
@@ -78,7 +79,7 @@ router.route("/losers").get(async (req, res) => {
 router.route("/matchWinners/:id").get(async (req, res) => {
   try {
     const data = await matchWinners(req.params.id);
-    res.send(JSON.stringify(data));
+    showQueryResult(!data.length, data, res);
   } catch (error) {
     res.sendStatus(500);
   }
